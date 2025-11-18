@@ -9,7 +9,7 @@ on:
 
 jobs:
   call-create-release:
-    uses: your-org/.github/.github/workflows/create-release.yml@main
+    uses: SchoutenEnZn/.github/.github/workflows/create-release.yml@main
     with:
       changelog_path: CHANGELOG.md
       version: ${{ github.event.inputs.version }}
