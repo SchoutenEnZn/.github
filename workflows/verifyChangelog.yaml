@@ -1,0 +1,9 @@
+name: Verify CHANGELOG Updated
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  call-changelog-check:
+    uses: your-org/.github/.github/workflows/changelog-check.yml@main
