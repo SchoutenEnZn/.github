@@ -11,101 +11,116 @@ This is a special repository recognized by GitHub for organization-wide defaults
 │   │   ├── bug_report.md
 │   │   ├── feature_request.md
 │   │   └── config.yml
-│   └── PULL_REQUEST_TEMPLATE/    # Default PR templates
-│       └── pull_request_template.md
-├── workflow-templates/            # Reusable workflow templates
-│   ├── changelog-check.yml
-│   ├── changelog-check.properties.json
-│   ├── release-from-changelog.yml
-│   └── release-from-changelog.properties.json
+│   ├── PULL_REQUEST_TEMPLATE/    # Default PR templates
+│   │   └── pull_request_template.md
+│   └── workflows/                # Centralized workflow files
+│       ├── createRelease.yaml
+│       └── verifyChangelog.yaml
 ├── profile/
 │   └── README.md                  # Organization profile page
+├── CHANGELOG.template.md          # Template for new repositories
+├── CONTRIBUTING.md                # Contributing guidelines
+├── PULL_REQUEST_TEMPLATE.md       # Root-level PR template
 └── README.md                      # This file
 ```
 
-## 🚀 Features
+## 🚀 What's Included
 
-### Workflow Templates
+### 📋 Community Health Files
 
-#### 1. **Changelog Check** (`changelog-check.yml`)
-Validates that pull requests include changelog updates.
+These files are automatically available to all repositories in the **SchoutenEnZn** organization:
 
-**What it does:**
-- ✅ Checks if CHANGELOG.md was modified in the PR
-- ✅ Allows skipping via `skip-changelog` keyword in PR description
-- ✅ Posts helpful comments on PRs missing changelog updates
-- ✅ Fails CI if changelog is required but missing
+#### **Issue Templates**
+- 🐛 **Bug Report** - Structured template for reporting bugs with environment details
+- ✨ **Feature Request** - Standardized format for proposing new features
 
-**Usage in repositories:**
-1. Go to Actions → New workflow
-2. Select "Changelog Check Workflow" from templates
-3. Commit to `.github/workflows/changelog-check.yml`
-
-#### 2. **Release from Changelog** (`release-from-changelog.yml`)
-Automatically creates releases based on CHANGELOG.md changes.
-
-**What it does:**
-- ✅ Detects unreleased changes in CHANGELOG.md
-- ✅ Automatically increments version numbers (semantic versioning)
-- ✅ Updates CHANGELOG.md with version and date
-- ✅ Creates git tags
-- ✅ Generates GitHub releases with release notes
-- ✅ Can be triggered manually with custom version
-
-**Triggers:**
-- Automatically on push to main/master branch
-- Manually via workflow dispatch with optional version input
-
-**Usage in repositories:**
-1. Go to Actions → New workflow
-2. Select "Release from Changelog Workflow" from templates
-3. Commit to `.github/workflows/release-from-changelog.yml`
-
-### Issue Templates
-
-Pre-configured issue templates for:
-- 🐛 **Bug Reports**: Structured bug reporting with environment details
-- ✨ **Feature Requests**: Standardized feature proposal format
-
-### Pull Request Template
-
-A comprehensive PR template that includes:
+#### **Pull Request Template**
+Comprehensive PR template that includes:
 - Change type classification
-- Changelog reminder with skip option
+- Changelog update reminder with skip option
 - Testing checklist
-- Documentation updates
-- Code quality checklist
+- Documentation requirements
+- Code quality checks
 
-## 📝 CHANGELOG.md Format
+#### **Contributing Guidelines** (`CONTRIBUTING.md`)
+Standard contribution workflow for all repositories
 
-Repositories using these workflows should maintain a CHANGELOG.md file:
+### 🔧 Centralized Workflows
 
-```markdown
-# Changelog
+#### **Verify CHANGELOG Updated** (`.github/workflows/verifyChangelog.yaml`)
+Ensures PRs update the CHANGELOG.md file before merging.
 
-All notable changes to this project will be documented in this file.
+**What it does:**
+- ✅ Verifies CHANGELOG.md was modified in the PR
+- ✅ Fails the check if changelog is missing
+- ✅ Compares against the base branch to detect changes
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+**How to use in your repositories:**
 
-## [Unreleased]
+Create `.github/workflows/changelog-check.yml` in your repository:
 
-### Added
-- New feature description (#123)
+```yaml
+name: Changelog Check
 
-### Changed
-- Changes to existing functionality (#124)
+on:
+  pull_request:
+    types: [opened, synchronize]
 
-### Fixed
-- Bug fixes (#125)
+jobs:
+  verify-changelog:
+    uses: SchoutenEnZn/.github/.github/workflows/verifyChangelog.yaml@main
+```
 
-### Security
-- Security improvements (#126)
+That's it! The workflow will automatically run on all PRs.
 
-## [1.0.0] - 2024-01-01
+---
 
-### Added
-- Initial release
+#### **Create Release** (`.github/workflows/createRelease.yaml`)
+Automatically creates GitHub releases from CHANGELOG.md versions.
+
+**What it does:**
+- ✅ Extracts version numbers from CHANGELOG.md
+- ✅ Generates release notes from changelog entries
+- ✅ Creates GitHub releases with tags
+- ✅ Can be triggered manually with a custom version
+
+**How to use in your repositories:**
+
+Create `.github/workflows/release.yml` in your repository:
+
+```yaml
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., v1.0.0). Leave blank for latest from CHANGELOG.md'
+        required: false
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    # Only run on merged PRs or manual dispatch
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    uses: SchoutenEnZn/.github/.github/workflows/createRelease.yaml@main
+    with:
+      version: ${{ github.event.inputs.version }}
+```
+
+### 📝 CHANGELOG Template
+
+`CHANGELOG.template.md` provides a starting point for new repositories following [Keep a Changelog](https://keepachangelog.com/) format.
+
+**To use:**
+```bash
+cp CHANGELOG.template.md CHANGELOG.md
+# Edit to match your repository name
 ```
 
 ## 🔧 How It Works
@@ -114,117 +129,150 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 GitHub automatically uses files from this `.github` repository as defaults for all repositories in the **SchoutenEnZn** organization that don't have their own versions.
 
-**What's shared:**
-- Issue templates
-- Pull request templates
-- Workflow templates (available in Actions UI)
+**Automatically shared:**
+- Issue templates (`.github/ISSUE_TEMPLATE/`)
+- Pull request templates (`.github/PULL_REQUEST_TEMPLATE/`)
+- Contributing guidelines (`CONTRIBUTING.md`)
 
-**What's NOT automatic:**
-- Workflows must be manually added to each repository (via Actions UI or copy-paste)
-- This is by design - workflows need explicit opt-in for security reasons
+**Not automatically shared:**
+- Workflows in `.github/workflows/` must be manually copied to each repository
+- This is by design for security reasons
 
 ### Repository-Specific Overrides
 
-Any repository can override these defaults by creating its own:
-- `.github/ISSUE_TEMPLATE/` directory
-- `.github/PULL_REQUEST_TEMPLATE/` directory
-- Workflow files in `.github/workflows/`
+Individual repositories can override these defaults by creating their own versions of any file.
 
-## 📋 Step-by-Step Setup Guide
+## 📋 Quick Start Guide
 
 ### For New Repositories
 
-1. **Create CHANGELOG.md**
+1. **Set up CHANGELOG.md**
    ```bash
-   # Copy the template format above into CHANGELOG.md
-   # Commit to your repository root
+   curl -o CHANGELOG.md https://raw.githubusercontent.com/SchoutenEnZn/.github/main/CHANGELOG.template.md
+   # Edit the file to replace REPO_NAME with your repository name
    ```
 
-2. **Add Changelog Check Workflow**
-   - Go to repository → Actions → New workflow
-   - Find "Changelog Check Workflow"
-   - Commit to `.github/workflows/changelog-check.yml`
+2. **Add Changelog Verification**
+   
+   Create `.github/workflows/verifyChangelog.yaml`:
+   ```yaml
+   name: Changelog Check
+   
+   on:
+     pull_request:
+       types: [opened, synchronize]
+   
+   jobs:
+     verify-changelog:
+       uses: SchoutenEnZn/.github/.github/workflows/verifyChangelog.yaml@main
+   ```
 
-3. **Add Release Automation Workflow**
-   - Go to repository → Actions → New workflow
-   - Find "Release from Changelog Workflow"
-   - Commit to `.github/workflows/release-from-changelog.yml`
+3. **Add Release Workflow** (Optional)
+   
+   Create `.github/workflows/createRelease.yml`:
+   ```yaml
+   name: Create Release
+   
+   on:
+     workflow_dispatch:
+       inputs:
+         version:
+           description: 'Version (e.g., v1.0.0)'
+           required: false
+     pull_request:
+       types:
+         - closed
+   
+   permissions:
+     contents: write
+   
+   jobs:
+     create-release:
+       if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+       uses: SchoutenEnZn/.github/.github/workflows/createRelease.yaml@main
+       with:
+         version: ${{ github.event.inputs.version }}
+   ```
 
-4. **Configure Branch Protection** (Recommended)
+4. **Enable Branch Protection** (Recommended)
    - Go to Settings → Branches
-   - Add rule for main/master
-   - Require "Check for Changelog Entry" status check to pass
+   - Add rule for `main` branch
+   - Require "Verify CHANGELOG Updated" status check to pass
 
 ### For Existing Repositories
 
-1. **Review existing CHANGELOG.md** or create one
-2. **Add workflows** as described above
-3. **Update documentation** to mention changelog requirements
-4. **Test** by creating a test PR
+1. Review or create `CHANGELOG.md` using the template
+2. Add the workflow files as shown in the "For New Repositories" section
+3. Update your documentation to mention changelog requirements
 
-## 🎯 Workflow Usage Examples
+> **💡 Tip:** See `.github/workflows/EXAMPLES.md` in this repository for more workflow examples and configurations.
 
-### Making a PR with Changelog
+## 💡 Workflow Usage
+
+### Working with Changelogs
+
+**Making a PR with Changelog Update:**
 
 1. Make your code changes
-2. Update CHANGELOG.md under `[Unreleased]`:
+2. Update `CHANGELOG.md` under the `[Unreleased]` section:
    ```markdown
    ## [Unreleased]
    
    ### Fixed
-   - Fixed login issue when username contains special characters (#42)
+   - Fixed login issue with special characters (#42)
    ```
-3. Create PR - changelog check will pass ✅
+3. Create PR → Changelog check passes ✅
 
-### Making a PR without Changelog
+**Making a PR without Changelog Update:**
 
-For changes that don't need changelog (docs, tests, CI):
+The current workflow **requires** changelog updates. If you need to skip the check:
+- Modify the workflow in your repository to add skip logic
+- Or temporarily disable the check for specific PRs
 
-1. Make your changes
-2. In PR description, add: `skip-changelog`
-3. Changelog check will pass ✅
+### Creating Releases
 
-### Creating a Release
+**Option 1: Automatic (on PR merge)**
+1. Ensure CHANGELOG.md has a versioned section (e.g., `## [1.0.0] - 2025-11-18`)
+2. Merge the PR
+3. The workflow automatically creates a GitHub release
 
-**Automatic (recommended):**
-1. Merge PRs with changelog updates to main
-2. Release workflow automatically triggers
-3. New version is created based on semantic versioning
-4. Release notes are extracted from changelog
-
-**Manual:**
-1. Go to Actions → Release from Changelog
+**Option 2: Manual trigger**
+1. Go to Actions → Create Release
 2. Click "Run workflow"
-3. Optionally specify version (e.g., "2.1.0")
-4. Release is created
+3. **Leave version blank** to use the latest version from CHANGELOG.md
+4. **Or specify a version** (e.g., `v1.2.3`) for manual control
 
-## 🔒 Permissions
+**CHANGELOG format for releases:**
+```markdown
+## [1.0.0] - 2025-11-18
 
-The release workflow requires:
-- `contents: write` - To create tags and releases
-- `pull-requests: write` - To interact with PRs (changelog check)
+### Added
+- New authentication system (#45)
 
-These are configured in the workflow files.
+### Fixed
+- Critical security vulnerability (#46)
+```
 
 ## 🛠️ Customization
 
-### Modify Workflows
+### Modifying Workflows
 
-To customize for your organization:
+To customize the reusable workflows:
 
 1. Clone this repository
-2. Edit workflow templates in `workflow-templates/`
-3. Update properties files (`.properties.json`) for metadata
-4. Commit changes
-5. Templates will be available to all org repositories
+2. Edit files in `.github/workflows/`:
+   - `verifyChangelog.yaml` - Changelog verification logic
+   - `createRelease.yaml` - Release creation and versioning
+3. Commit and push changes
+4. **All repositories using the workflows automatically get the updates!** 🎉
 
-### Add More Templates
+### Adding More Workflows
 
-You can add additional workflow templates:
+You can add additional centralized workflows:
 
-1. Create `workflow-templates/your-workflow.yml`
-2. Create `workflow-templates/your-workflow.properties.json`
-3. Templates appear in Actions UI for all repos
+1. Create new workflow files in `.github/workflows/` using `workflow_call` trigger
+2. Document them in this README and in `EXAMPLES.md`
+3. Repositories can reference them using the `uses:` syntax
 
 ## 📚 Resources
 
@@ -237,25 +285,32 @@ You can add additional workflow templates:
 
 To improve these templates:
 
-1. Fork this repository
+1. Create a branch in this repository
 2. Make your changes
 3. Test in a sample repository
-4. Submit a pull request
+4. Open a pull request
 
 ## ❓ FAQ
 
-**Q: Why aren't workflows automatically added to repositories?**  
-A: For security reasons, GitHub requires workflows to be explicitly added to each repository. However, the templates make this easy via the Actions UI.
+**Q: Are workflows automatically added to repositories?**  
+A: No. You need to create a workflow file in each repository that **references** the centralized workflow using `uses: SchoutenEnZn/.github/.github/workflows/workflowName.yaml@main`.
 
-**Q: Can I use different changelog formats?**  
-A: Yes, but you may need to modify the workflow scripts that parse CHANGELOG.md.
+**Q: Can I customize the workflows for my repository?**  
+A: Yes! You can either:
+- Copy the workflow to your repo and modify it directly
+- Or add parameters/conditions in your caller workflow
 
-**Q: What if I want to skip releases for some merges?**  
-A: The release workflow only triggers when there are unreleased changes in CHANGELOG.md. If no changes are detected, no release is created.
+**Q: What happens when you update workflows in this repository?**  
+A: All repositories using `@main` automatically get the updates on their next workflow run! Use `@v1.0.0` tags for stability.
 
-**Q: Can I customize version numbering?**  
-A: Yes, use the manual workflow dispatch with a specific version number.
+**Q: How do I update to use the latest workflow version?**  
+A: If you're using `@main`, it updates automatically. If using a tagged version like `@v1.0.0`, change it to the new tag or `@main`.
 
-## 📄 License
+**Q: Does the release workflow automatically version my releases?**  
+A: The workflow reads version numbers from your CHANGELOG.md. You need to add versioned sections manually (e.g., `## [1.0.0] - 2025-11-18`).
 
-These templates are provided as-is for use within the SchoutenEnZn organization.
+**Q: Can I trigger releases manually?**  
+A: Yes! Use the workflow dispatch option in the Actions tab and optionally specify a version number.
+
+**Q: Can I test workflow changes before they affect all repos?**  
+A: Yes! Use a branch or tag reference like `@feature-branch` or `@test-v1` instead of `@main` while testing.
