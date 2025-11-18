@@ -1,0 +1,68 @@
+##############################
+# Reusable Workflow: Create Release
+# Version: 0.0.3
+##############################
+
+name: Create Release (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      changelog_path:
+        description: 'Path to the changelog file (default: CHANGELOG.md)'
+        required: false
+        default: 'CHANGELOG.md'
+      version:
+        description: 'Version number (e.g., v1.0.0). Leave blank to use latest from changelog.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Determine Version
+        id: determine_version
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            if [ -f "${{ inputs.changelog_path }}" ]; then
+              VERSION=$(grep -oP '^## \\[\\K[^]]+' "${{ inputs.changelog_path }}" | head -n 1)
+              if [ -z "$VERSION" ]; then
+                echo "No versions found in ${{ inputs.changelog_path }}."
+                exit 1
+              fi
+            else
+              echo "${{ inputs.changelog_path }} not found. Cannot determine version."
+              exit 1
+            fi
+          fi
+          [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_NO_V=${VERSION#v}" >> $GITHUB_ENV
+
+      - name: Extract Release Notes
+        run: |
+          if [ -f "${{ inputs.changelog_path }}" ]; then
+            awk '/## \\['"${VERSION_NO_V}"'\\]/{flag=1; next} /## \\[/{flag=0} flag' "${{ inputs.changelog_path }}" > release_notes.txt
+            if [ ! -s release_notes.txt ]; then
+              echo "No release notes found for version ${VERSION_NO_V}."
+              exit 1
+            fi
+          else
+            echo "${{ inputs.changelog_path }} not found."
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "${VERSION}" --title "${VERSION}" --notes-file release_notes.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
