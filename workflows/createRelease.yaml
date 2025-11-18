@@ -8,13 +8,14 @@ name: Create Release (Reusable)
 on:
   workflow_call:
     inputs:
-      changelog_path:
-        description: 'Path to the changelog file (default: CHANGELOG.md)'
-        required: false
-        default: 'CHANGELOG.md'
       version:
         description: 'Version number (e.g., v1.0.0). Leave blank to use latest from changelog.'
         required: false
+        type: string
+      changelog_path:
+        description: 'Path to changelog file'
+        required: false
+        default: 'CHANGELOG.md'
         type: string
 
 permissions:
