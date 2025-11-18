@@ -6,4 +6,4 @@ on:
 
 jobs:
   call-changelog-check:
-    uses: SchoutenEnZn/.github/.github/workflows/changelog-check.yml@main
+    uses: SchoutenEnZn/.github/.github/workflow-templates/verifyChangelog.yaml@main
