@@ -1,0 +1,12 @@
+{
+  "name": "Changelog Check Workflow",
+  "description": "Validates that pull requests include changelog updates or skip label",
+  "iconName": "octicon checklist",
+  "categories": [
+    "Automation",
+    "Code Review"
+  ],
+  "filePatterns": [
+    "CHANGELOG.md$"
+  ]
+}

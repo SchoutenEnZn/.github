@@ -1,0 +1,12 @@
+{
+  "name": "Release from Changelog Workflow",
+  "description": "Automatically creates releases based on the CHANGELOG.md file",
+  "iconName": "octicon package",
+  "categories": [
+    "Automation",
+    "Deployment"
+  ],
+  "filePatterns": [
+    "CHANGELOG.md$"
+  ]
+}
