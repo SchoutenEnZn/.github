@@ -101,4 +101,5 @@ No. You add versioned sections to CHANGELOG.md (e.g., `## [1.0.0] - 2025-12-05`)
 
 ---
 
+
 **Resources:** [GitHub Actions](https://docs.github.com/en/actions) • [Keep a Changelog](https://keepachangelog.com/) • [Semantic Versioning](https://semver.org/)
