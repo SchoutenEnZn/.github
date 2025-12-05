@@ -13,9 +13,13 @@ This is a special repository recognized by GitHub for organization-wide defaults
 │   │   └── config.yml
 │   ├── PULL_REQUEST_TEMPLATE/    # Default PR templates
 │   │   └── pull_request_template.md
-│   └── workflows/                # Centralized workflow files
-│       ├── createRelease.yaml
-│       └── verifyChangelog.yaml
+│   └── workflows/                # Workflows
+│       ├── reusable/             # Reusable workflow templates
+│       │   ├── createRelease.yaml
+│       │   ├── verifyChangelog.yaml
+│       │   └── EXAMPLES.md
+│       ├── createRelease.yaml    # Uses reusable template
+│       └── verifyChangelog.yaml  # Uses reusable template
 ├── profile/
 │   └── README.md                  # Organization profile page
 ├── CHANGELOG.template.md          # Template for new repositories
@@ -86,7 +90,7 @@ Automatically creates GitHub releases from CHANGELOG.md versions.
 
 **How to use in your repositories:**
 
-Create `.github/workflows/release.yml` in your repository:
+Create `.github/workflows/createRelease.yaml` in your repository:
 
 ```yaml
 name: Create Release
@@ -108,7 +112,7 @@ jobs:
   create-release:
     # Only run on merged PRs or manual dispatch
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
-    uses: SchoutenEnZn/.github/.github/workflows/createRelease.yaml@main
+    uses: SchoutenEnZn/.github/.github/workflows/reusable/createRelease.yaml@main
     with:
       version: ${{ github.event.inputs.version }}
 ```
@@ -164,12 +168,12 @@ Individual repositories can override these defaults by creating their own versio
    
    jobs:
      verify-changelog:
-       uses: SchoutenEnZn/.github/.github/workflows/verifyChangelog.yaml@main
+       uses: SchoutenEnZn/.github/.github/workflows/reusable/verifyChangelog.yaml@main
    ```
 
 3. **Add Release Workflow** (Optional)
    
-   Create `.github/workflows/createRelease.yml`:
+   Create `.github/workflows/createRelease.yaml`:
    ```yaml
    name: Create Release
    
@@ -189,7 +193,7 @@ Individual repositories can override these defaults by creating their own versio
    jobs:
      create-release:
        if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
-       uses: SchoutenEnZn/.github/.github/workflows/createRelease.yaml@main
+       uses: SchoutenEnZn/.github/.github/workflows/reusable/createRelease.yaml@main
        with:
          version: ${{ github.event.inputs.version }}
    ```
@@ -205,7 +209,7 @@ Individual repositories can override these defaults by creating their own versio
 2. Add the workflow files as shown in the "For New Repositories" section
 3. Update your documentation to mention changelog requirements
 
-> **💡 Tip:** See `.github/workflows/EXAMPLES.md` in this repository for more workflow examples and configurations.
+> **💡 Tip:** See `.github/workflows/reusable/EXAMPLES.md` in this repository for more workflow examples and configurations.
 
 ## 💡 Workflow Usage
 
@@ -260,7 +264,7 @@ The current workflow **requires** changelog updates. If you need to skip the che
 To customize the reusable workflows:
 
 1. Clone this repository
-2. Edit files in `.github/workflows/`:
+2. Edit files in `.github/workflows/reusable/`:
    - `verifyChangelog.yaml` - Changelog verification logic
    - `createRelease.yaml` - Release creation and versioning
 3. Commit and push changes
@@ -270,8 +274,8 @@ To customize the reusable workflows:
 
 You can add additional centralized workflows:
 
-1. Create new workflow files in `.github/workflows/` using `workflow_call` trigger
-2. Document them in this README and in `EXAMPLES.md`
+1. Create new workflow files in `.github/workflows/reusable/` using `workflow_call` trigger
+2. Document them in this README and in `reusable/EXAMPLES.md`
 3. Repositories can reference them using the `uses:` syntax
 
 ## 📚 Resources

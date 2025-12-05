@@ -2,6 +2,8 @@
 
 This directory contains example workflows that demonstrate how to use the centralized reusable workflows from this repository in your own projects.
 
+The reusable workflow templates are in `.github/workflows/reusable/`.
+
 ## Changelog Verification
 
 Create `.github/workflows/verifyChangelog.yaml` in your repository:
@@ -15,7 +17,7 @@ on:
 
 jobs:
   verify-changelog:
-    uses: SchoutenEnZn/.github/.github/workflows/verifyChangelog.yaml@main
+    uses: SchoutenEnZn/.github/.github/workflows/reusable/verifyChangelog.yaml@main
 ```
 
 ## Release Creation
@@ -42,7 +44,7 @@ jobs:
   create-release:
     # Only run on merged PRs or manual dispatch
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
-    uses: SchoutenEnZn/.github/.github/workflows/createRelease.yaml@main
+    uses: SchoutenEnZn/.github/.github/workflows/reusable/createRelease.yaml@main
     with:
       version: ${{ github.event.inputs.version }}
 ```
@@ -64,7 +66,7 @@ on:
 
 jobs:
   verify-changelog:
-    uses: SchoutenEnZn/.github/.github/workflows/verifyChangelog.yaml@main
+    uses: SchoutenEnZn/.github/.github/workflows/reusable/verifyChangelog.yaml@main
 EOF
 
 # Create release workflow
@@ -87,7 +89,7 @@ permissions:
 jobs:
   create-release:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
-    uses: SchoutenEnZn/.github/.github/workflows/createRelease.yaml@main
+    uses: SchoutenEnZn/.github/.github/workflows/reusable/createRelease.yaml@main
     with:
       version: ${{ github.event.inputs.version }}
 EOF
